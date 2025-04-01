@@ -10,16 +10,16 @@ from speed_and_distance_estimator import SpeedAndDistance_Estimator
 
 
 def main():
-    # Read Video
+    #Read Video
     video_frames = read_video('input_videos/08fd33_4.mp4')
 
-    # Initialize Tracker
+    #Tracker
     tracker = Tracker('models/best.pt')
 
     tracks = tracker.get_object_tracks(video_frames,
                                        read_from_stub=True,
                                        stub_path='stubs/track_stubs.pkl')
-    # Get object positions 
+    # Get object positions
     tracker.add_position_to_tracks(tracks)
 
     # camera movement estimator
@@ -30,18 +30,18 @@ def main():
     camera_movement_estimator.add_adjust_positions_to_tracks(tracks,camera_movement_per_frame)
 
 
-    # View Trasnformer
+    #Trnsfrmr
     view_transformer = ViewTransformer()
     view_transformer.add_transformed_position_to_tracks(tracks)
 
-    # Interpolate Ball Positions
+    #Interpolate
     tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
 
-    # Speed and distance estimator
+    #S/D
     speed_and_distance_estimator = SpeedAndDistance_Estimator()
     speed_and_distance_estimator.add_speed_and_distance_to_tracks(tracks)
 
-    # Assign Player Teams
+    #Assign teams
     team_assigner = TeamAssigner()
     team_assigner.assign_team_color(video_frames[0], 
                                     tracks['players'][0])
@@ -55,7 +55,7 @@ def main():
             tracks['players'][frame_num][player_id]['team_color'] = team_assigner.team_colors[team]
 
     
-    # Assign Ball Aquisition
+    # Assign Posession
     player_assigner =PlayerBallAssigner()
     team_ball_control= []
     for frame_num, player_track in enumerate(tracks['players']):
@@ -77,14 +77,13 @@ def main():
     ## Draw Camera movement
     output_video_frames = camera_movement_estimator.draw_camera_movement(output_video_frames,camera_movement_per_frame)
 
-    ## Draw Speed and Distance
+    ## Draw S/D
     speed_and_distance_estimator.draw_speed_and_distance(output_video_frames,tracks)
 
-    # Save video
+    # Save
     save_video(output_video_frames, 'output_videos/output_video.avi')
 
 if __name__ == '__main__':
     main()
     
     
-#All GIvine
